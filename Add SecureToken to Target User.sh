@@ -4,34 +4,22 @@
 #
 #            Name:  Add SecureToken to Target User.sh
 #     Description:  This script adds a SecureToken to the target local user to prepare the Mac for enabling FileVault. Prompts for password of SecureToken admin (gets SecureToken Admin Username from Jamf Pro script parameter) and target user. This workflow is required to authorize programmatically-created user accounts (that were not already explicitly given a SecureToken) to enable or use FileVault and unlock disk encryption on APFS-formatted startup volumes.
-#                   https://github.com/mpanighetti/add-securetoken-to-target-user
+#                   https://github.com/wavebirddash/add-securetoken-to-target-user
 #
 #                   MIT License
 #
-#                   Copyright (c) 2017 Mario Panighetti
+#                   Copyright © 2017 Mario Panighetti
 #
-#                   Permission is hereby granted, free of charge, to any person obtaining a copy
-#                   of this software and associated documentation files (the "Software"), to deal
-#                   in the Software without restriction, including without limitation the rights
-#                   to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-#                   copies of the Software, and to permit persons to whom the Software is
-#                   furnished to do so, subject to the following conditions:
+#                   Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
 #
-#                   The above copyright notice and this permission notice shall be included in all
-#                   copies or substantial portions of the Software.
+#                   The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
 #
-#                   THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-#                   IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-#                   FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-#                   AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-#                   LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-#                   OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-#                   SOFTWARE.
+#                   THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #
 #          Author:  Mario Panighetti
 #         Created:  2017-10-04
-#   Last Modified:  2025-04-28
-#         Version:  4.1
+#   Last Modified:  2026-01-12
+#         Version:  4.1.1
 #
 ###
 
@@ -68,7 +56,7 @@ check_jamf_pro_arguments () {
     echo "❌ ERROR: Undefined Jamf Pro argument, unable to proceed."
     exit 74
   fi
-  
+
 }
 
 
@@ -79,17 +67,18 @@ check_macos_version () {
   if [ "$macOSVersionMajor" -lt 10 ]; then
     echo "macOS version ${macOSVersionMajor} predates the use of SecureToken functionality, no action required."
     exit 0
-  # Exit if macOS 10 < 10.13.4.
+  # Exit if macOS 10 < 10.13.
   elif [ "$macOSVersionMajor" -eq 10 ]; then
     if [ "$macOSVersionMinor" -lt 13 ]; then
       echo "macOS version ${macOSVersionMajor}.${macOSVersionMinor} predates the use of SecureToken functionality, no action required."
       exit 0
+    # Exit if macOS 10.13 < 10.13.4.
     elif [ "$macOSVersionMinor" -eq 13 ] && [ "$macOSVersionBuild" -lt 4 ]; then
       echo "macOS version ${macOSVersionMajor}.${macOSVersionMinor}.${macOSVersionBuild} predates the use of SecureToken functionality, no action required."
       exit 0
     fi
   fi
-  
+
 }
 
 
@@ -106,9 +95,9 @@ check_target_username () {
     else
       targetUsername="$loggedInUser"
     fi
-  elif id -u "$targetUsername"; then 
+  elif id -u "$targetUsername"; then
     echo "Confirmed target user exists on this Mac."
-  else 
+  else
     echo "❌ ERROR: User not found on this Mac, unable to proceed: ${targetUsername}"
     exit 1
   fi
@@ -124,7 +113,7 @@ check_securetoken_target_user () {
     echo "${targetUsername} already has a SecureToken, no action required."
     exit 0
   fi
-  
+
 }
 
 
@@ -142,7 +131,7 @@ check_securetoken_admin () {
   else
     echo "✅ Verified ${secureTokenAdmin} has SecureToken."
   fi
-  
+
 }
 
 
@@ -154,7 +143,7 @@ local_account_password_prompt () {
     echo "❌ ERROR: A password was not entered for ${1}, unable to proceed. Please rerun policy; if issue persists, a manual SecureToken add will be required to continue."
     exit 1
   fi
-  
+
 }
 
 
@@ -166,7 +155,7 @@ local_account_password_validation () {
   else
     echo "❌ ERROR: Failed password validation for ${1}. Please reenter the password when prompted."
   fi
-  
+
 }
 
 
@@ -190,7 +179,7 @@ securetoken_add () {
     echo "❌ ERROR: Unexpected result, unable to proceed. Please rerun policy; if issue persists, a manual SecureToken add will be required to continue."
     exit 1
   fi
-  
+
 }
 
 
